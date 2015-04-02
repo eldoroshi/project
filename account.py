@@ -165,8 +165,45 @@ class AccountCreation:
 
 			print e
 
+	#Populate the named.conf.local zone
 
+	def addzone (account):
+		
+		f = open("/etc/bind/named.conf.local", "a+")
+		
+		f.write("\t zone \""+ account.domain + "\" { \n")
+		
+		f.write("\t\t type master;\n")
+	
+		f.write("\t\tfile \"/etc/bind/zones/db." + account.domain + "\"; \n")
 
+		f.write("};")
+
+		f.close()	
+		
+     	
+
+	def loadconfig (account):
+		
+		apachecontrol  = subprocess.check_output(["apache2ctl", "configtest"])
+
+		print apachecontrol
+		
+		if apachecontrol ==  "" : 
+		
+			apachereload = subprocess.Popen(["apache2ctl", "graceful"])
+			print "restarted"	
+
+		namedconfig = subprocess.check_output(["named-checkconf"])
+		
+		if "" in namedconfig :
+			
+			zonereload = subprocess.Popen(["rndc", "reload"])
+			
+			zonereload.wait()
+
+			print zonereload.communicate()	
+			
 x = AccountCreation("codel", "codel", "codel_pass", "codel.com", "email@codel.com" )
     
 x.CreateUser()
@@ -174,3 +211,7 @@ x.CreateUser()
 x.VirtualHosting()
 
 x.dnszone()
+
+x.addzone()
+
+x.loadconfig()

@@ -18,7 +18,7 @@ import crypt
 
 import io
 
-import pprint
+import MySQLdb
 
 from  datetime import datetime
 
@@ -57,6 +57,21 @@ class AccountCreation:
 		password = crypt.crypt(account.password, "1987")
 
 		adduser = subprocess.Popen(["useradd",  "-d", "/home/" + account.username, "-m", account.username, "-p", password])	
+	
+
+	#Create public html directory
+    
+	def publichtml_dir(account):
+
+		try:
+			createdir = subprocess.check_output(["mkdir", "/home/" + account.username + "/public_html"])
+		
+			print "Public Folder Created"
+
+		except subprocess.CalledProcessError:
+			
+
+				print "Error Folder can't be created"
 
     #Create Virtual Hosting
 
@@ -185,14 +200,15 @@ class AccountCreation:
 
 	def loadconfig (account):
 		
-		apachecontrol  = subprocess.check_output(["apache2ctl", "configtest"])
-
-		print apachecontrol
 		
-		if apachecontrol ==  "" : 
+		try: 
 		
 			apachereload = subprocess.Popen(["apache2ctl", "graceful"])
-			print "restarted"	
+			print "restarted"
+		
+		except subprocess.CalledProcessError:
+
+			print "Some error in the sites.conf file"		
 
 		namedconfig = subprocess.check_output(["named-checkconf"])
 		
@@ -204,14 +220,57 @@ class AccountCreation:
 
 			print zonereload.communicate()	
 			
+	
+	def createdb(account):
+
+		db = MySQLdb.connect("localhost", "root", "eldo2014")
+		
+		cur = db.cursor()
+		
+		try:
+			db_name = account.username + "db"
+
+			createdb = "CREATE DATABASE IF NOT EXISTS %s;" %(db_name)
+ 					
+			results = cur.execute(createdb)
+			
+			print "Database Creation", results
+			
+			createuser = "CREATE USER '%s'@'%s'" %(account.username, account.domain)  
+			
+			results = cur.execute(createuser)
+			
+			print "User Creation", results
+	
+			setpassword ="SET PASSWORD FOR '%s'@'%s' = PASSWORD('%s')" %(account.username, account.domain, account.password)
+			
+			results = cur.execute(setpassword)
+		
+			print "Set the user password", results			
+
+			give_priviledges = "GRANT ALL ON %s.* TO '%s'@'%s';" %(db_name, account.username, account.domain)		     
+		
+			results = cur.execute(give_priviledges) 
+		
+			print "Set user priviledges", results
+
+		except MySQLdb.Error, e:
+			
+			print e
+
+
 x = AccountCreation("codel", "codel", "codel_pass", "codel.com", "email@codel.com" )
     
-x.CreateUser()
+#x.CreateUser()
 
-x.VirtualHosting()
+#x.VirtualHosting()
 
-x.dnszone()
+#x.dnszone()
 
-x.addzone()
+#x.addzone()
 
-x.loadconfig()
+#x.loadconfig()
+
+#x.publichtml_dir()
+
+x.createdb()

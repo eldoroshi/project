@@ -31,9 +31,7 @@ from dns.rdataclass import *
 from dns.rdatatype import *
 
 
-class AccountCreation:
-
-    
+class AccountCreation:    
 
 	def __init__(account, name, username, password, domain, email, theme):
 
@@ -238,19 +236,19 @@ class AccountCreation:
 			
 			print "Database Creation", results
 			
-			createuser = "CREATE USER '%s'@'%s'" %(account.username, account.domain)  
+			createuser = "CREATE USER '%s'@'%s'" %(account.username, "localhost")  
 			
 			results = cur.execute(createuser)
 			
 			print "User Creation", results
 	
-			setpassword ="SET PASSWORD FOR '%s'@'%s' = PASSWORD('%s')" %(account.username, account.domain, account.password)
+			setpassword ="SET PASSWORD FOR '%s'@'%s' = PASSWORD('%s')" %(account.username, "localhost", account.password)
 			
 			results = cur.execute(setpassword)
 		
 			print "Set the user password", results			
 
-			give_priviledges = "GRANT ALL ON %s.* TO '%s'@'%s';" %(db_name, account.username, account.domain)		     
+			give_priviledges = "GRANT ALL ON %s.* TO '%s'@'%s';" %(db_name, account.username, "localhost")		     
 		
 			results = cur.execute(give_priviledges) 
 		
@@ -265,7 +263,7 @@ class AccountCreation:
 	def downloadWP(account):
 		
 		try:
-			download = subprocess.check_output(["wp", "core", "download" , "--path=/home/"+ account.username + "/public_html", "--url="+ account.domain, "--user="+account.email ])
+			download = subprocess.check_output(["wp", "core", "download" , "--path=/home/"+ account.username + "/public_html", "--url="+ account.domain, "--user="+account.email, "--allow-root" ])
 			
 			print "Wordpress Download Complete"
 				
@@ -279,8 +277,11 @@ class AccountCreation:
 		
 		try:
 		
-	        	 config = subprocess.check_output(["wp", "core", "config", "--path=/home/"+ account.username + "/public_html", "--dbname="+ account.username + "db", "--dbuser="+ account.username , "--dbpass="+ account.password ])	
-		       	installation = subprocess.check_output(["wp", "core", "install", "--path=/home/" + account.username + "/public_html", "--title=" + account.name , "--url=" + account.domain , "--admin_user=" + account.username, "--admin_password=" + account.password, "--admin_email=" + account.email ])
+	        	config = subprocess.check_output(["wp", "core", "config", "--path=/home/"+ account.username + "/public_html", "--dbname="+ account.username + "db", "--dbuser="+ account.username, "--dbpass="+ account.password, "--allow-root" ])	
+		       	
+			installation = subprocess.check_output(["wp", "core", "install", "--path=/home/" + account.username + "/public_html", "--title=" + account.name , "--url=" + account.domain , "--admin_user=" + account.username, "--admin_password=" + account.password, "--admin_email=" + account.email, "--allow-root" ])
+			
+			print "Installation its ok"			
 		
 		except subprocess.CalledProcessError:
 
@@ -291,7 +292,7 @@ class AccountCreation:
 		
 		try:
 			
-			theme = subprocess.check_output(["wp", "theme", "install", "--path=/home/"+ account.username + "/public_html", account.theme, "--activate"])
+			theme = subprocess.check_output(["wp", "theme", "install", "--path=/home/"+ account.username + "/public_html", account.theme, "--activate", "--allow-root"])
 
 
 			print "Theme was Installed"
@@ -303,18 +304,22 @@ class AccountCreation:
 			print "Theme installation error"
 
 
-x = AccountCreation("codel", "codel", "codel_pass", "codel.com", "email@codel.com", "specular.zip" )
+x = AccountCreation("unisol", "unisol", "unicorn", "unisol.com", "email@unisol.com", "twentyfifteen" )
     
-#x.CreateUser()
+x.CreateUser()
 
-#x.VirtualHosting()
+x.VirtualHosting()
 
-#x.dnszone()
+x.dnszone()
 
-#x.addzone()
+x.addzone()
 
-#x.loadconfig()
+x.loadconfig()
 
-#x.publichtml_dir()
+x.publichtml_dir()
 
 x.createdb()
+
+x.downloadWP()
+
+x.installWP()

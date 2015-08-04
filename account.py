@@ -35,7 +35,7 @@ class AccountCreation:
 
     
 
-	def __init__(account, name, username, password, domain, email):
+	def __init__(account, name, username, password, domain, email, theme):
 
 		account.name = name
 
@@ -46,6 +46,8 @@ class AccountCreation:
 		account.domain = domain
 	
 		account.email = email
+
+		account.theme = theme
 					        
 		
 
@@ -258,8 +260,50 @@ class AccountCreation:
 			
 			print e
 
+	#Installation of Wordpress Core
 
-x = AccountCreation("codel", "codel", "codel_pass", "codel.com", "email@codel.com" )
+	def downloadWP(account):
+		
+		try:
+			download = subprocess.check_output(["wp", "core", "download" , "--path=/home/"+ account.username + "/public_html", "--url="+ account.domain, "--user="+account.email ])
+			
+			print "Wordpress Download Complete"
+				
+		except subprocess.CalledProcessError:
+
+			print "Error during the process of wordpress core download"
+	
+	
+	#Install and configure wordpress
+	def installWP(account):
+		
+		try:
+		
+	        	 config = subprocess.check_output(["wp", "core", "config", "--path=/home/"+ account.username + "/public_html", "--dbname="+ account.username + "db", "--dbuser="+ account.username , "--dbpass="+ account.password ])	
+		       	installation = subprocess.check_output(["wp", "core", "install", "--path=/home/" + account.username + "/public_html", "--title=" + account.name , "--url=" + account.domain , "--admin_user=" + account.username, "--admin_password=" + account.password, "--admin_email=" + account.email ])
+		
+		except subprocess.CalledProcessError:
+
+			print "Error during installation process"  		
+	
+	
+	def installtheme(account):
+		
+		try:
+			
+			theme = subprocess.check_output(["wp", "theme", "install", "--path=/home/"+ account.username + "/public_html", account.theme, "--activate"])
+
+
+			print "Theme was Installed"
+
+
+		except subprocess.CalledProcessError:
+
+			
+			print "Theme installation error"
+
+
+x = AccountCreation("codel", "codel", "codel_pass", "codel.com", "email@codel.com", "specular.zip" )
     
 #x.CreateUser()
 

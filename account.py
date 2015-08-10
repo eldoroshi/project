@@ -306,20 +306,20 @@ class AccountCreation:
 
 x = AccountCreation("unisol", "unisol", "unicorn", "unisol.com", "email@unisol.com", "twentyfifteen" )
     
-x.CreateUser()
+#x.CreateUser()
 
 x.VirtualHosting()
 
-x.dnszone()
+#x.dnszone()
 
-x.addzone()
+#x.addzone()
 
-x.loadconfig()
+#x.loadconfig()
 
-x.publichtml_dir()
+#x.publichtml_dir()
 
-x.createdb()
+#x.createdb()
 
-x.downloadWP()
+#x.downloadWP()
 
-x.installWP()
+#x.installWP()

@@ -131,12 +131,12 @@ class AccountEditing:
 			newconf.close()	
 			
 	#Update wordpress domain
-	def EditwpDomain(account):
+	def EditDomainWp(account):
 
 		path = "/home/" + account.username + "/public_html"
 
 		try:
-			updatedomain = subprocess.check_output(["wp", "search-replace", account.domain, account.newdomain, "--skip-columns=guid", "--path="+ path ])
+			updatedomain = subprocess.check_output(["wp", "search-replace", account.domain, account.newdomain, "--skip-columns=guid", "--path="+ path, "--allow-root"])
 			
 			print "New domain was updated"					
 
@@ -146,20 +146,25 @@ class AccountEditing:
 
 	
 	#Update the wordpress password
-	def UpdatedwpPass(account):
+	def EditPassWp(account):
+		
+		newpassword = crypt.crypt(account.password, "Abcdefgzhsh1AbCD")
 
 		path = "/home/" + account.username + "/public_html"		
 
 		try:
 		
-			updatedpass =  subprocess.check_output(["wp", "user", "update", account.username, "--path=" + path, "--user_pass=" + account.password])
+			updatedpass =  subprocess.check_output(["wp", "user", "update", account.username, "--path=" + path, "--user_pass=" + newpassword, "--allow-root"])
 			
-			print "Password was updated for user" + account.username
+			print "Password was updated for user " + account.username
 		
 		except subprocess.CalledProcessError:
 			
 			print "Error during the update of the  wordpress user password"
 
+
+
+	
 
 x = AccountEditing("unisol", "unicorn", "unisol.com", "unisolnew.com", "email@unisol.com", "twentyfifteen")
 
@@ -167,6 +172,8 @@ x = AccountEditing("unisol", "unicorn", "unisol.com", "unisolnew.com", "email@un
 
 #x.EditDomainVh()
 
-x.EditDomainDns()
+#x.EditDomainDns()
 
+x.EditDomainWp()
 
+#x.EditPassWp()

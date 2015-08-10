@@ -30,6 +30,8 @@ from dns.rdataclass import *
 from dns.rdatatype import *
 
 class AccountEditing:
+
+
 	
 	def __init__(account, username, password, domain, newdomain, email, theme):
 
@@ -45,6 +47,9 @@ class AccountEditing:
 
 		account.theme = theme
 
+		account.path = "/home/"+ account.username + "/public_html"
+
+		
 
 	#Editing User Password
 	def EditUserPass(account):
@@ -133,10 +138,9 @@ class AccountEditing:
 	#Update wordpress domain
 	def EditDomainWp(account):
 
-		path = "/home/" + account.username + "/public_html"
 
 		try:
-			updatedomain = subprocess.check_output(["wp", "search-replace", account.domain, account.newdomain, "--skip-columns=guid", "--path="+ path, "--allow-root"])
+			updatedomain = subprocess.check_output(["wp", "search-replace", account.domain, account.newdomain, "--skip-columns=guid", "--path="+ account.path, "--allow-root"])
 			
 			print "New domain was updated"					
 
@@ -150,21 +154,30 @@ class AccountEditing:
 		
 		newpassword = crypt.crypt(account.password, "Abcdefgzhsh1AbCD")
 
-		path = "/home/" + account.username + "/public_html"		
 
 		try:
 		
-			updatedpass =  subprocess.check_output(["wp", "user", "update", account.username, "--path=" + path, "--user_pass=" + newpassword, "--allow-root"])
+			updatedpass =  subprocess.check_output(["wp", "user", "update", account.username, "--path=" + account.path, "--user_pass=" + newpassword, "--allow-root"])
 			
 			print "Password was updated for user " + account.username
 		
 		except subprocess.CalledProcessError:
 			
 			print "Error during the update of the  wordpress user password"
-
-
-
 	
+	
+	#Change wordpress theme
+	def EditthemeWp(account):
+		
+		try:
+			updatetheme =  subprocess.check_output(["wp", "theme", "install", account.theme, "--allow-root", "--path="+account.path, "--activate"]) 
+		       
+		        print "Theme was changed"
+
+		except subprocess.CalledProcessError:
+
+			print "Error during the process of wordpress theme update"
+			
 
 x = AccountEditing("unisol", "unicorn", "unisol.com", "unisolnew.com", "email@unisol.com", "twentyfifteen")
 
@@ -174,6 +187,8 @@ x = AccountEditing("unisol", "unicorn", "unisol.com", "unisolnew.com", "email@un
 
 #x.EditDomainDns()
 
-x.EditDomainWp()
+#x.EditDomainWp()
 
 #x.EditPassWp()
+
+x.EditthemeWp()

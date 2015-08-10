@@ -47,7 +47,6 @@ class AccountEditing:
 
 
 	#Editing User Password
-
 	def EditUserPass(account):
 		
 		newpassword = crypt.crypt(account.password, "1987")
@@ -63,6 +62,7 @@ class AccountEditing:
 			print "Error during the password editing"
 
 	
+	#Update the domain name to virtual hosting
 	def EditDomainVh(account):
 
 		
@@ -89,7 +89,9 @@ class AccountEditing:
 		else:   
 	
 			print "Error during the process of changing the domain in virtual host"
+	
 
+	#Change the domain name into zone files
 	def EditDomainDns(account):
 		
 		dnsfilezone = "/etc/bind/zones/db." + account.domain
@@ -128,6 +130,37 @@ class AccountEditing:
 
 			newconf.close()	
 			
+	#Update wordpress domain
+	def EditwpDomain(account):
+
+		path = "/home/" + account.username + "/public_html"
+
+		try:
+			updatedomain = subprocess.check_output(["wp", "search-replace", account.domain, account.newdomain, "--skip-columns=guid", "--path="+ path ])
+			
+			print "New domain was updated"					
+
+		except subprocces.CalledProcessError:
+
+			print "Error during the update of the wordpress domain"
+
+	
+	#Update the wordpress password
+	def UpdatedwpPass(account):
+
+		path = "/home/" + account.username + "/public_html"		
+
+		try:
+		
+			updatedpass =  subprocess.check_output(["wp", "user", "update", account.username, "--path=" + path, "--user_pass=" + account.password])
+			
+			print "Password was updated for user" + account.username
+		
+		except subprocess.CalledProcessError:
+			
+			print "Error during the update of the  wordpress user password"
+
+
 x = AccountEditing("unisol", "unicorn", "unisol.com", "unisolnew.com", "email@unisol.com", "twentyfifteen")
 
 #x.EditUserPass()

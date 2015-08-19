@@ -89,24 +89,53 @@ class AccountDelete:
 		list = []	
 		
 		zone_found = False
+	
+		zone_type = False
+
+		zone_file = False
+
+		zone_1 = False
 		
-		zone = 'zone "'+ account.domain +'\"'
+		zone = 'zone "'+ account.domain +'\" '
+
+		type_master = "type master"
 
 		for line in file:
-		
+					
+			
 			if zone in line:
 
 				zone_found = True
-			
+													
+		
 			if zone_found :
-
-				list.append(line)
-
-				if "type" in line :
-
-								
 				
-       
+				if "type" in line :				
+					
+					zone_1 = True					
+					
+					continue
+			
+				if "file" in line :
+
+					zone_file = True
+					
+					zone_found = False
+	
+
+			else:
+				print line	
+
+
+
+		#content_replace = "\n".join(list) + "\n };"
+
+		#f =open(CONF_FILENAME).read()
+
+		#m = f.replace(content_replace, "\n")
+	
+		#print content_replace
+       		
 
 	def in_conf(account):
 
@@ -124,7 +153,7 @@ class AccountDelete:
 
 
                   
-x = AccountDelete("unisol", "unisol", "codel.com", "unisol.com", " ", " ")
+x = AccountDelete("unisol", "unisol", "uni.com", "uni.com", " ", " ")
 
 x.DeleteDnsZone()
 

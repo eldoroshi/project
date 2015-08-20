@@ -34,15 +34,6 @@ from dns.rdatatype import *
 
 CONF_FILENAME = '/etc/bind/named.conf.local'
 
-NAMESERVERS = []
-
-ZONE_FILENAME = '/etc/bind/zones/{domain}.hosts'
-
-ZONE_REGEX_STR = '^zone "%s"\{.*?\s+type (.*?);\s+file ".*?";\s+\};\s*'
-
-ZONE_REGEX = re.compile(ZONE_REGEX_STR % '(.*)', re.MULTILINE)
-
-
 
 class AccountDelete:
 
@@ -65,7 +56,7 @@ class AccountDelete:
 
 		account.path = "/home/"+ account.username
 
-	
+	#Delete UserDirectory
 	def DeleteUserDirectory(account):
 
 		try:
@@ -74,31 +65,25 @@ class AccountDelete:
 		except subprocess.CalledErrorProcess:
 
 			print "User folder can't be removed"
-		
+	
+	#Delete Virtual Hosting 	
 	def DeleteVirtualHosting(account):
 		
 		with vhost_manager.VHost() as vhost:
 			
 			vhost.remove(domain=account.domain, port = "80")
 
-	def DeleteDnsZone(account):		
 	
+	#Delete Zone in named.conf.local
+	def DeleteDnsZone(account):		
+		
+		list = []
 		
 		file = open(CONF_FILENAME, "r+")
-
-		list = []	
 		
 		zone_found = False
-	
-		zone_type = False
-
-		zone_file = False
-
-		zone_1 = False
-		
+			
 		zone = 'zone "'+ account.domain +'\" '
-
-		type_master = "type master"
 
 		for line in file:
 					
@@ -106,50 +91,87 @@ class AccountDelete:
 			if zone in line:
 
 				zone_found = True
-													
-		
+							
 			if zone_found :
 				
-				if "type" in line :				
-					
-					zone_1 = True					
-					
+				if "type" in line :		
 					continue
 			
 				if "file" in line :
 
-					zone_file = True
-					
+					continue
+				 			
+				if "}" in line:
+
 					zone_found = False
 	
-
 			else:
-				print line	
+
+				list.append(line)
+
+
+		content = "\n".join(list)
+		
+		try:		
+
+			f = open(CONF_FILENAME, "w")
+
+			f.write(content)
+		
+		except IOError as e:
+
+    			print "I/O error({0}): {1}".format(e.errno, e.strerror)	
+
+
+		f.close()
+
+
+	#Delete database and user responsible for this database
+	def DeleteDb(account):
+
+		db = MySQLdb.connect("localhost", "root", "eldo2014")
+		
+		cur = db.cursor()
+		
+		try:
+
+			db_name = account.username + "db"
+
+			deletedb = "DROP DATABASE %s;" %(db_name)
+			
+			results = cur.execute(deletedb)
+		
+			print results
+
+			deleteuser = "DROP USER '%s'@'%s'" %(account.username, "localhost")
+
+			results = cur.execute(deleteuser)
+
+			print results
+			
+			cur.close()
+
+		except MySQLdb.Error, e:
+
+			print e
+		
+		
+	#Delete User		
+	def DeleteUser(account):
+
+
+		try:
+
+			removeuser =  subprocess.check_output(["userdel", account.username])	
+
+		
+		except subprocess.CalledErrorProcess:
 
 
 
-		#content_replace = "\n".join(list) + "\n };"
+			print "User can't be removed"			
+			
 
-		#f =open(CONF_FILENAME).read()
-
-		#m = f.replace(content_replace, "\n")
-	
-		#print content_replace
-       		
-
-	def in_conf(account):
-
-        	'Check if record exists within the named.conf file'
-
-		content = open(CONF_FILENAME).read()
-	
-		if account.domain in content:
-
-			return True
-
-       	 	else:
-
-            		return False
 
 
                   

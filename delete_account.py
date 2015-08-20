@@ -23,17 +23,15 @@ import MySQLdb
 
 from  datetime import datetime
 
-import dns.zone
-
-from dns.exception import DNSException
-
-from dns.rdataclass import *
-
-from dns.rdatatype import *
 
 
 CONF_FILENAME = '/etc/bind/named.conf.local'
 
+MYSQL_HOST = 'localhost'
+
+MYSQL_USER = 'root'
+
+MYSQL_PASS = 'eldo2014'
 
 class AccountDelete:
 
@@ -117,6 +115,8 @@ class AccountDelete:
 			f = open(CONF_FILENAME, "w")
 
 			f.write(content)
+	
+			print "File was written"
 		
 		except IOError as e:
 
@@ -129,7 +129,7 @@ class AccountDelete:
 	#Delete database and user responsible for this database
 	def DeleteDb(account):
 
-		db = MySQLdb.connect("localhost", "root", "eldo2014")
+		db = MySQLdb.connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS)
 		
 		cur = db.cursor()
 		
@@ -143,12 +143,14 @@ class AccountDelete:
 		
 			print results
 
-			deleteuser = "DROP USER '%s'@'%s'" %(account.username, "localhost")
+			deleteuser = "DROP USER '%s'@'%s'" %(account.username, MYSQL_HOST)
 
 			results = cur.execute(deleteuser)
 
 			print results
 			
+			print "Database and User was deleted"
+
 			cur.close()
 
 		except MySQLdb.Error, e:
@@ -159,14 +161,13 @@ class AccountDelete:
 	#Delete User		
 	def DeleteUser(account):
 
-
 		try:
 
 			removeuser =  subprocess.check_output(["userdel", account.username])	
 
+			print "User Deleted"
 		
 		except subprocess.CalledErrorProcess:
-
 
 
 			print "User can't be removed"			
@@ -175,7 +176,13 @@ class AccountDelete:
 
 
                   
-x = AccountDelete("unisol", "unisol", "uni.com", "uni.com", " ", " ")
+x = AccountDelete("uni", "uni", "uni.com", "uni.com", " ", " ")
 
-x.DeleteDnsZone()
+#x.DeleteDnsZone()
+
+#x.DeleteDb()
+
+#x.DeleteUser()
+
+x.DeleteVirtualHosting()
 

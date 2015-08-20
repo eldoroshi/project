@@ -267,6 +267,10 @@ class VHost:
 
             self._content = "\n".join(new_content)
             self._write_file = True
+	    print "Virtual host was removed with success"
+	else:
+
+	    print "Virtual host doesn't exist and can't be removed"	
 
 
     def list_domains(self, domain=None, port=DEFAULT_PORT):

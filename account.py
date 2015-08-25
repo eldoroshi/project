@@ -57,7 +57,8 @@ class AccountCreation:
 		password = crypt.crypt(account.password, "1987")
 
 		adduser = subprocess.Popen(["useradd",  "-d", "/home/" + account.username, "-m", account.username, "-p", password])	
-	
+		
+		return "user created"
 
 	#Create public html directory
     

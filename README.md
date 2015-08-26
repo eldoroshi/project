@@ -10,4 +10,14 @@ The project isn't complete.
 I'm working to make it more secure and costumizable.
 
 
+*Reuqired Library
+
+DNS python
+
+pip install validators
+
+MySQLdb
+
+flask_restful
+
 

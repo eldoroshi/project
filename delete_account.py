@@ -38,15 +38,13 @@ class AccountDelete:
 
 
 
-	def __init__(account, username, password, domain, newdomain, email, theme):
+	def __init__(account, username, password, domain, email, theme):
 
 		account.username = username
 
 		account.password = password
 
 		account.domain = domain
-
-		account.newdomain = newdomain
 
 		account.email = email
 
@@ -176,7 +174,7 @@ class AccountDelete:
 
 
                   
-x = AccountDelete("uni", "uni", "uni.com", "uni.com", " ", " ")
+x = AccountDelete("uni", "uni", "uni.com", "uni@uni.com", " ")
 
 #x.DeleteDnsZone()
 
@@ -184,5 +182,5 @@ x = AccountDelete("uni", "uni", "uni.com", "uni.com", " ", " ")
 
 #x.DeleteUser()
 
-x.DeleteVirtualHosting()
+#x.DeleteVirtualHosting()
 

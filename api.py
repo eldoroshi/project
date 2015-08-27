@@ -1,5 +1,9 @@
 import validators
 
+from itsdangerous import (TimedJSONWebSignatureSerializer 
+				
+			   as Serializer, BadSignature, SignatureExpired)
+
 from functools import wraps
 
 from flask import request, Response
@@ -19,7 +23,12 @@ app = Flask(__name__)
 
 api = Api(app)
 
+''' This is the secret key that will be used to encrypt token '''
 
+app.config['SECRET_KEY'] = 'Look at me mother fucker'
+
+
+''' Check the authentication that will be connected with db '''
 def check_auth(username, password):
 
     '''This function is called to check if a username /
@@ -45,7 +54,7 @@ def authenticate():
     {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
-
+'''Get the authentication credentials '''
 def requires_auth(f):
 
     @wraps(f)
@@ -62,8 +71,32 @@ def requires_auth(f):
 
     return decorated
 
+''' Generate the token for the authentetication '''
+@app.route('/api/token')
+@requires_auth
+def generate_auth_token():
+
+	s = Serializer(app.config['SECRET_KEY'], expires_in=3600)
+
+        token = s.dumps({"id": "2"})
+	
+	return token
 
 
+''' Verify the token if its the right one '''
+@app.route('/api/check')
+def verify_token(token):
+
+	s = Serializer(app.config['SECRET_KEY'])
+
+	try:
+	 	data = s.loads(token)
+		
+	except:	
+		 return None
+	
+	return data.get("id")
+	
 
 def email(email_str):
 
@@ -208,7 +241,7 @@ api.add_resource(update, '/update')
 api.add_resource(remove, '/remove')
 
 
-''' curl http://api.example.com -d "name=bob"-d "name=sue"-d "name=joe" '''
+''' curl http://username:password@example.com -d "name=bob"-d "name=sue"-d "name=joe" '''
 
 
 if __name__ == '__main__':

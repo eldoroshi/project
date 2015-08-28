@@ -82,6 +82,7 @@ def requires_auth(f):
 
     return decorated
 
+
 ''' Generate the token for the authentetication '''
 @app.route('/api/token')
 @requires_auth
@@ -142,7 +143,7 @@ def url(vdomain):
 
 		return vdomain
 	else: 
-		return "This isn't an valid url"
+		return False
 
 
 
@@ -154,9 +155,9 @@ post_parser.add_argument(
 
     'name', dest='name',
      
-    location='form', required=True,
-	
-    help='The account name', type=string
+    location='form', help='The account name', 
+
+    type=string
 
 
 )
@@ -232,7 +233,18 @@ class create(Resource):
         
 	args = post_parser.parse_args()
         create = AccountCreation(args.name, args.username, args.password, args.domain, args.email, args.theme)
-        user = create.run()
+        
+	user = create.CreateUser()
+        public_dir = create.publichtml_dir()
+        virtualhosting = create.VirtualHosting()
+        dnszone = create.dnszone()
+        addzone = create.addzone()
+        loadconfig = create.loadconfig()
+ 	createdb = create.createdb()
+        downloadwp = create.downloadWP()
+	installwp = create.installWP()
+	installtheme = create.installtheme()
+	 
 	return {user : 'created'}
    			
 
@@ -240,18 +252,18 @@ class create(Resource):
 class updatepass(Resource):
     @requires_auth	
     def post(self):
-       
+	auth =  request.authorization       
 	args = post_parser.parse_args()
-	update = AccountEditing(args.name, auth.username, args.password, args.domain, args.newdomain, args.email, args.theme)
+	update = AccountEditing(auth.username, args.password, args.domain, args.newdomain, args.email, args.theme)
 	user = update.EditUserPass()
 	return {user: 'updated'}
 
 class updatedomain(Resource):
     @requires_auth
     def post(self):
-	
+	auth = request.authorization
 	args = post_parser.parse_args()
-	update = AccountEditing(args.name, auth.username, args.password, args.domain, args.newdomain, args.theme)			
+	update = AccountEditing(auth.username, args.password, args.domain, args.newdomain, args.theme)			
 	virtualdomain = update.EditDomainVh()
 	dnszone = update.EditDomainDns()
 	wpdomain = update.EditDomainWp()
@@ -260,16 +272,18 @@ class updatedomain(Resource):
 class updatewpass(Resource):
     @requires_auth
     def post(self):
+        auth = request.authorization
 	args = post_parser.parse_args()
-        update = AccountEditing(args.name, auth.username, args.password, args.domain, args.newdomain, args.theme)  
+        update = AccountEditing(auth.username, args.password, args.domain, args.newdomain, args.theme)  
         editwppass = update.EditPassWp()
         return {editwppass : 'update'}
 
 class updatetheme(Resource):
     @requires_auth
     def post(self):
+        auth = request.authorization
 	args =post_parser.parse_args()
-	update = AccountEditing(args.name, auth.username, args.password, '', '',  '', args.theme)	
+	update = AccountEditing(auth.username, args.password, args.domain, args.newdomain,  args.email, args.theme)	
 	editwptheme = update.EditthemeWp()
 	return {editwppass : 'update' } 
 
@@ -280,18 +294,19 @@ class remove(Resource):
     
     @requires_auth 	
     def post(self):
-
+	auth = request.authorization
 	args=post_parser.parse_args()
-	remove = AccountDelete(args.name, args.usename, args.password, args.domain, args.theme)
+	remove = AccountDelete(auth.username, args.password, args.domain, args.email, args.theme)
 	user =remove.DeleteUserDirectory()
  	return  {user: 'removed'} 
 	  
  
-
+api.add_resource(create, '/create')
 api.add_resource(updatepass, '/updatepass')
-#api.add_resource(create, '/create')
-#api.add_resource(update, '/update')
-#api.add_resource(remove, '/remove')
+api.add_resource(updatedomain, '/updatedomain')
+api.add_resource(updatewpass, '/updatewpass')
+api.add_resource(updatetheme, '/updatetheme')
+api.add_resource(remove, '/remove')
 
 
 ''' curl http://username:password@example.com -d "name=bob"-d "name=sue"-d "name=joe" '''

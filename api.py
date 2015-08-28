@@ -29,15 +29,26 @@ app.config['SECRET_KEY'] = 'Look at me mother fucker'
 
 
 ''' Check the authentication that will be connected with db '''
-def check_auth(username, password):
+def check_auth(username_token, password):
 
     '''This function is called to check if a username /
 
     password combination is valid.
 
     '''
+    user = verify_token(username_token)
 
-    return username == 'admin'and password == 'secret'
+    if not user:		
+
+    # Check username and password from db 
+    
+    	return username_token == 'admin'and password == 'secret'
+    
+    else:	
+		
+	if user == '2':
+
+    		return username_token == 'admin'
 
 
 
@@ -183,6 +194,17 @@ post_parser.add_argument(
 
 post_parser.add_argument(
 
+     'newdomain', dest = 'newdomain',
+     
+     location = 'form', required=True,
+    
+     help = 'The new domain', type = url	
+		
+	
+)
+
+post_parser.add_argument(
+
      'theme', dest='theme',
 
       location = 'form', required=True,
@@ -191,34 +213,56 @@ post_parser.add_argument(
 
 ) 	
 
-class server(Resource):
-
-	def post(self):
-	
-		return 'Server Started'
 
 
 '''Post api class to execute creation account functions '''
 class create(Resource):
 
+    
     def post(self):
-
- 	args = post_parser.parse_args()
-	create = AccountCreation(args.name, args.username, args.password, args.domain, args.email, args.theme)
-	user = create.CreateUser()
+        
+	args = post_parser.parse_args()
+        create = AccountCreation(args.name, args.username, args.password, args.domain, args.email, args.theme)
+        user = create.run()
 	return {user : 'created'}
    			
 
 '''Post api class to execute editing account functions '''
-class update(Resource):
+class updatepass(Resource):
     @requires_auth	
     def post(self):
-
+       
 	args = post_parser.parse_args()
-	update = AccountEditing(args.name, args.username, args.password, args.domain, args.newdomain, args.email, args.theme)
+	update = AccountEditing(args.name, auth.username, args.password, args.domain, args.newdomain, args.email, args.theme)
 	user = update.EditUserPass()
 	return {user: 'updated'}
 
+class updatedomain(Resource):
+    @requires_auth
+    def post(self):
+	
+	args = post_parser.parse_args()
+	update = AccountEditing(args.name, auth.username, args.password, args.domain, args.newdomain, args.theme)			
+	virtualdomain = update.EditDomainVh()
+	dnszone = update.EditDomainDns()
+	wpdomain = update.EditDomainWp()
+        return {virtualdomain: 'update', dnszone: 'update', wpdomain : 'update'}        
+
+class updatewpass(Resource):
+    @requires_auth
+    def post(self):
+	args = post_parser.parse_args()
+        update = AccountEditing(args.name, auth.username, args.password, args.domain, args.newdomain, args.theme)  
+        editwppass = update.EditPassWp()
+        return {editwppass : 'update'}
+
+class updatetheme(Resource):
+    @requires_auth
+    def post(self):
+	args =post_parser.parse_args()
+	update = AccountEditing(args.name, auth.username, args.password, '', '',  '', args.theme)	
+	editwptheme = update.EditthemeWp()
+	return {editwppass : 'update' } 
 
 
 '''Post api class to execute remove account functions'''
@@ -231,7 +275,7 @@ class remove(Resource):
 	args=post_parser.parse_args()
 	remove = AccountDelete(args.name, args.usename, args.password, args.domain, args.theme)
 	user =remove.DeleteUserDirectory()
- 	return  {user: 'removed'}
+ 	return  {user: 'removed'} 
 	  
  
 

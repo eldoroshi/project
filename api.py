@@ -42,13 +42,13 @@ def check_auth(username_token, password):
 
     # Check username and password from db 
     
-    	return username_token == 'admin'and password == 'secret'
+    	return username_token == 'oni'and password == 'secret'
     
     else:	
 		
 	if user == '2':
 
-    		return username_token == 'admin'
+    		return username_token == 'oni'
 
 
 
@@ -107,7 +107,16 @@ def verify_token(token):
 		 return None
 	
 	return data.get("id")
+
+#Get username from the token	
+def get_username():
 	
+	token = generate_auth_token()
+        result = verify_token(token)
+	if result != '2':
+		return False
+	return username ==  'admin'
+
 
 def email(email_str):
 
@@ -196,7 +205,7 @@ post_parser.add_argument(
 
      'newdomain', dest = 'newdomain',
      
-     location = 'form', required=True,
+     location = 'form', 
     
      help = 'The new domain', type = url	
 		
@@ -279,10 +288,10 @@ class remove(Resource):
 	  
  
 
-api.add_resource(server, '/server')
-api.add_resource(create, '/create')
-api.add_resource(update, '/update')
-api.add_resource(remove, '/remove')
+api.add_resource(updatepass, '/updatepass')
+#api.add_resource(create, '/create')
+#api.add_resource(update, '/update')
+#api.add_resource(remove, '/remove')
 
 
 ''' curl http://username:password@example.com -d "name=bob"-d "name=sue"-d "name=joe" '''

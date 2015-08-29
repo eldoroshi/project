@@ -42,13 +42,13 @@ def check_auth(username_token, password):
 
     # Check username and password from db 
     
-    	return username_token == 'oni'and password == 'secret'
+    	return username_token == 'ocean' and password == 'secret'
     
     else:	
 		
 	if user == '2':
 
-    		return username_token == 'oni'
+    		return username_token == 'ocean'
 
 
 
@@ -125,25 +125,26 @@ def email(email_str):
 
 		return email_str
 	else:
-		return "This isn't a valid email address"
+
+	    return False
+
 
 def string(valid_string):
 
 	if valid_string.isalnum():
 
 		return valid_string
-
 	else:
-		 return "This isn't a valid string"
-
+	 	return False
 
 def url(vdomain):
 
 	if validators.url(vdomain):
 
 		return vdomain
-	else: 
+	else:
 		return False
+		
 
 
 
@@ -232,8 +233,7 @@ class create(Resource):
     def post(self):
         
 	args = post_parser.parse_args()
-        create = AccountCreation(args.name, args.username, args.password, args.domain, args.email, args.theme)
-        
+        create = AccountCreation(args.name, args.username, args.password, args.domain, args.email, args.theme)        
 	user = create.CreateUser()
         public_dir = create.publichtml_dir()
         virtualhosting = create.VirtualHosting()

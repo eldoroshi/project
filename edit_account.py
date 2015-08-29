@@ -60,11 +60,11 @@ class AccountEditing:
 		
 			editpassword = subprocess.Popen(["usermod", "-p", newpassword, account.username ])
 		
-			print "New password was changed succesfull" 
+			return "New password was changed succesfull" 
 		
 		except	subprocess.CalledProcessError:
 
-			print "Error during the password editing"
+			return "Error during the password editing"
 
 	
 	#Update the domain name to virtual hosting
@@ -83,17 +83,17 @@ class AccountEditing:
 			
 				f.write(n)
 
-				print "File was writen"		
+				return "File was writen"		
 
 			except:
 
-				print "File can't be written"	
+				return "File can't be written"	
 			
 			f.close()
 
 		else:   
 	
-			print "Error during the process of changing the domain in virtual host"
+			return "Error during the process of changing the domain in virtual host"
 	
 
 	#Change the domain name into zone files
@@ -110,11 +110,11 @@ class AccountEditing:
 			
 			if "" in updatednszone: 
 
-				print "Dns file zonefile was updated"
+				return "Dns file zonefile was updated"
 			
 		except subprocess.CalledProcessError:
 			
-			print "Dns file zone error during the process of update"
+			return "Dns file zone error during the process of update"
 			
 	        namedconf = open(namedfile).read()				
 			
@@ -127,11 +127,11 @@ class AccountEditing:
 			
 				newconf.write(namedconf)
 
-				print "Named conf file was updated"		
+				return "Named conf file was updated"		
 		
 			except IOError as e:
 
-    				print "I/O error({0}): {1}".format(e.errno, e.strerror)	
+    				return "I/O error({0}): {1}".format(e.errno, e.strerror)	
 
 			newconf.close()	
 			
@@ -142,11 +142,11 @@ class AccountEditing:
 		try:
 			updatedomain = subprocess.check_output(["wp", "search-replace", account.domain, account.newdomain, "--skip-columns=guid", "--path="+ account.path, "--allow-root"])
 			
-			print "New domain was updated"					
+			return "New domain was updated"					
 
 		except subprocces.CalledProcessError:
 
-			print "Error during the update of the wordpress domain"
+			return "Error during the update of the wordpress domain"
 
 	
 	#Update the wordpress password
@@ -159,11 +159,11 @@ class AccountEditing:
 		
 			updatedpass =  subprocess.check_output(["wp", "user", "update", account.username, "--path=" + account.path, "--user_pass=" + newpassword, "--allow-root"])
 			
-			print "Password was updated for user " + account.username
+			return "Password was updated for user " + account.username
 		
 		except subprocess.CalledProcessError:
 			
-			print "Error during the update of the  wordpress user password"
+			return "Error during the update of the  wordpress user password"
 	
 	
 	#Change wordpress theme
@@ -172,11 +172,11 @@ class AccountEditing:
 		try:
 			updatetheme =  subprocess.check_output(["wp", "theme", "install", account.theme, "--allow-root", "--path="+account.path, "--activate"]) 
 		       
-		        print "Theme was changed"
+		        return "Theme was changed"
 
 		except subprocess.CalledProcessError:
 
-			print "Error during the process of wordpress theme update"
+			return "Error during the process of wordpress theme update"
 			
 
 x = AccountEditing("unisol", "unicorn", "unisol.com", "unisolnew.com", "email@unisol.com", "twentyfifteen")

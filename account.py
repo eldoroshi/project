@@ -30,6 +30,7 @@ from dns.rdataclass import *
 
 from dns.rdatatype import *
 
+from urlparse import urlparse
 
 class AccountCreation:    
 
@@ -41,7 +42,7 @@ class AccountCreation:
 
 		account.username = username
 		
-		account.domain = domain
+		account.domain = urlparse(domain).hostname
 	
 		account.email = email
 
@@ -67,21 +68,21 @@ class AccountCreation:
 		try:
 			createdir = subprocess.check_output(["mkdir", "/home/" + account.username + "/public_html"])
 		
-			print "Public Folder Created"
+			return "Public Folder Created"
 
 		except subprocess.CalledProcessError:
 			
-
-				print "Error Folder can't be created"
+			return "Error Folder can't be created"
 
     #Create Virtual Hosting
 
 	def VirtualHosting(account):
 
+	   try:
+
 		f = open("/etc/apache2/sites-available/sites.conf", "a+") 
 		
 		f.write("<VirtualHost *:80> \n")
-
 
 		f.write("\tServerAdmin " + account.email + "\n") 
 
@@ -121,6 +122,9 @@ class AccountCreation:
 	
         	f.close()
 
+	   except IOError:
+
+		return  "Virtual host file can't be written"
 
    #Add Dns Zones
 	
@@ -235,29 +239,29 @@ class AccountCreation:
  					
 			results = cur.execute(createdb)
 			
-			print "Database Creation", results
+			return "Database Creation", results
 			
 			createuser = "CREATE USER '%s'@'%s'" %(account.username, "localhost")  
 			
 			results = cur.execute(createuser)
 			
-			print "User Creation", results
+			return "User Creation", results
 	
 			setpassword ="SET PASSWORD FOR '%s'@'%s' = PASSWORD('%s')" %(account.username, "localhost", account.password)
 			
 			results = cur.execute(setpassword)
 		
-			print "Set the user password", results			
+			return "Set the user password", results			
 
 			give_priviledges = "GRANT ALL ON %s.* TO '%s'@'%s';" %(db_name, account.username, "localhost")		     
 		
 			results = cur.execute(give_priviledges) 
 		
-			print "Set user priviledges", results
+			return "Set user priviledges", results
 
 		except MySQLdb.Error, e:
 			
-			print e
+			return e
 
 	#Installation of Wordpress Core
 
@@ -266,11 +270,11 @@ class AccountCreation:
 		try:
 			download = subprocess.check_output(["wp", "core", "download" , "--path=/home/"+ account.username + "/public_html", "--url="+ account.domain, "--user="+account.email, "--allow-root" ])
 			
-			print "Wordpress Download Complete"
+			return "Wordpress Download Complete"
 				
 		except subprocess.CalledProcessError:
 
-			print "Error during the process of wordpress core download"
+			return "Error during the process of wordpress core download"
 	
 	
 	#Install and configure wordpress
@@ -282,11 +286,11 @@ class AccountCreation:
 		       	
 			installation = subprocess.check_output(["wp", "core", "install", "--path=/home/" + account.username + "/public_html", "--title=" + account.name , "--url=" + account.domain , "--admin_user=" + account.username, "--admin_password=" + account.password, "--admin_email=" + account.email, "--allow-root" ])
 			
-			print "Installation its ok"			
+			return "Installation its ok"			
 		
 		except subprocess.CalledProcessError:
 
-			print "Error during installation process"  		
+			return "Error during installation process"  		
 	
 	
 	def installtheme(account):
@@ -296,16 +300,16 @@ class AccountCreation:
 			theme = subprocess.check_output(["wp", "theme", "install", "--path=/home/"+ account.username + "/public_html", account.theme, "--activate", "--allow-root"])
 
 
-			print "Theme was Installed"
+			return "Theme was Installed"
 
 
 		except subprocess.CalledProcessError:
 
 			
-			print "Theme installation error"
+			return "Theme installation error"
 
 
-x = AccountCreation("unisol", "unisol", "unicorn", "unisol.com", "email@unisol.com", "twentyfifteen" )
+#x = AccountCreation("unisol", "unisol", "unicorn", "unisol.com", "email@unisol.com", "twentyfifteen" )
     
 #x.CreateUser()
 

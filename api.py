@@ -28,6 +28,8 @@ api = Api(app)
 app.config['SECRET_KEY'] = 'Look at me mother fucker'
 
 
+
+
 ''' Check the authentication that will be connected with db '''
 def check_auth(username_token, password):
 
@@ -224,46 +226,174 @@ post_parser.add_argument(
 
 ) 	
 
+''' Call the Account Creation class to load all the creation functions '''
+
+def creation():
+	
+	args = post_parser.parse_args()
+	create = AccountCreation(args.name, args.username, args.password, args.domain, args.email, args.theme)
+	return create
+
+''' Call the AccountEditing class to load all the update functions '''
+
+@requires_auth 
+def updates():
+	
+	
+	auth =  request.authorization       
+	args = post_parser.parse_args()
+	update = AccountEditing(auth.username, args.password, args.domain, args.newdomain, args.email, args.theme)
+	return update
+
+@requires_auth
+def delete():
+	
+	auth = request.authorization
+	args=post_parser.parse_args()
+	remove = AccountDelete(auth.username, args.password, args.domain, args.email, args.theme)
+	return remove	
+
+
+
 
 
 '''Post api class to execute creation account functions '''
 class create(Resource):
 
     
-    def post(self):
-        
-	args = post_parser.parse_args()
-        create = AccountCreation(args.name, args.username, args.password, args.domain, args.email, args.theme)        
-	user = create.CreateUser()
-        public_dir = create.publichtml_dir()
-        virtualhosting = create.VirtualHosting()
-        dnszone = create.dnszone()
-        addzone = create.addzone()
-        loadconfig = create.loadconfig()
- 	createdb = create.createdb()
-        downloadwp = create.downloadWP()
-	installwp = create.installWP()
-	installtheme = create.installtheme()
+	def post(self):
+	
+	        create = creation()
+		user = create.CreateUser()
+        	public_dir = create.publichtml_dir()
+        	virtualhosting = create.VirtualHosting()
+        	dnszone = create.dnszone()
+        	addzone = create.addzone()
+        	loadconfig = create.loadconfig()
+ 		createdb = create.createdb()
+        	downloadwp = create.downloadWP()
+		installwp = create.installWP()
+		installtheme = create.installtheme()
 	 
-	return {user : 'created'}
+		return {user : 'created'}
    			
+		''' Create user on the system '''
+
+class createuser(Resource):
+
+	def post(self):
+
+		create = creation()
+		user =create.CreateUser()
+		return {user: 'message'} 
+
+
+''' Create public directory '''
+class createdir(Resource):
+	
+	def post(self):
+
+		create= creation()
+		directory = create.publichtml_dir()
+		return {directory: 'message'}
+
+'''Create virtual hosting configuration for apache in sites.conf'''
+class createvirtualhost(Resource):
+	
+	def post(self):
+		
+                create = creation() 
+		virtualhost = create.VirtualHosting()
+		return {virtualhost : 'message'}
+
+
+''' Create dns configuration in named.conf.local '''
+class createdns(Resource):
+	
+	def post(self):
+
+		create = creation()
+		dns =  create.dnszone()
+		return {dns : 'message'}
+
+'''Create dns zone file '''
+class createzone(Resource):
+	
+	def post(self):
+ 
+		create = creation()
+		dnszone = create.addzone()
+		return {dnszone : 'message'}
+
+
+''' Reload dns and apache configuration withouth restart the service '''
+class reload(Resource):
+	
+	def post(self):
+
+		create = creation()
+		config =  create.loadconfig()
+		return {config : 'message'}
+
+
+''' Create new db for the wordpress installation '''
+
+class createdatabase(Resource):
+	
+	def post(self):
+	
+	 	create = creation()
+		db = create.createdb()
+		return {db : 'message'}
+ 
+		
+
+class downloadwordpress(Resource):
+
+	def post(self):
+		
+		create = creation()
+		downloadwp = create.downloadWP()
+		return {downloadwp :  'message'}
+
+''' Install Wordpress '''
+
+class installwordpress(Resource):
+	
+	def post(self):
+		
+		create = creation()
+		installwordpress = create.installWP()
+		return {installwordpress : 'message' }
+
+''' Install Wordpress Theme '''
+class installwptheme(Resource):
+
+	def post(self):
+		
+		
+		create = creation()
+		theme = create.installtheme()
+		return {theme: 'message'}
+
+
 
 '''Post api class to execute editing account functions '''
 class updatepass(Resource):
     @requires_auth	
     def post(self):
-	auth =  request.authorization       
-	args = post_parser.parse_args()
-	update = AccountEditing(auth.username, args.password, args.domain, args.newdomain, args.email, args.theme)
+
+	update = updates()
 	user = update.EditUserPass()
 	return {user: 'updated'}
+
+''' Update domain in sites.conf(apache), update with new domain dns and wp db  '''
 
 class updatedomain(Resource):
     @requires_auth
     def post(self):
-	auth = request.authorization
-	args = post_parser.parse_args()
-	update = AccountEditing(auth.username, args.password, args.domain, args.newdomain, args.theme)			
+
+	update = updates()
 	virtualdomain = update.EditDomainVh()
 	dnszone = update.EditDomainDns()
 	wpdomain = update.EditDomainWp()
@@ -272,18 +402,16 @@ class updatedomain(Resource):
 class updatewpass(Resource):
     @requires_auth
     def post(self):
-        auth = request.authorization
-	args = post_parser.parse_args()
-        update = AccountEditing(auth.username, args.password, args.domain, args.newdomain, args.theme)  
+        
+	update = updates() 
         editwppass = update.EditPassWp()
         return {editwppass : 'update'}
 
 class updatetheme(Resource):
     @requires_auth
     def post(self):
-        auth = request.authorization
-	args =post_parser.parse_args()
-	update = AccountEditing(auth.username, args.password, args.domain, args.newdomain,  args.email, args.theme)	
+        
+	update = updates()
 	editwptheme = update.EditthemeWp()
 	return {editwppass : 'update' } 
 
@@ -292,21 +420,96 @@ class updatetheme(Resource):
 
 class remove(Resource):
     
-    @requires_auth 	
-    def post(self):
-	auth = request.authorization
-	args=post_parser.parse_args()
-	remove = AccountDelete(auth.username, args.password, args.domain, args.email, args.theme)
-	user =remove.DeleteUserDirectory()
- 	return  {user: 'removed'} 
-	  
+	@requires_auth 	
+	def post(self):
+
+		remove =  delete()		
+		user = remove.DeleteUserDirectory()
+		virtualhosting = remove.DeleteVirtualHosting()
+		deletednszone =  remove.DeleteDnsZone()
+		deletedb =  remove.DeleteDb()
+		deleteuser = remove.DeleteUser()
+
+ 		return  {user: 'removed', virtualhosting: 'message', deletednszone : 'message', deletedb : 'message', deleteuser :  'deleteuser'} 
+
+
+''' Delete user directory '''
+class deletedir(Resource):	  
  
+	@requires_auth
+	def post(self):
+
+		remove  =  delete()	
+        	user = remove.DeleteUserDirectory()
+		return {user: 'removed'}
+		
+''' Delete virtual hosting  '''
+
+class deletevirtualhosting(Resource):
+	
+	@requires_auth
+	def post(self):
+		
+		remove = delete()
+		virtualhosting  = remove.DeleteVirtualHosting()
+		return {virtualhosting :  'message'} 	
+
+''' Delete dns record zone '''
+
+class  deletedns(Resource):
+	
+	@requires_auth
+	def post(self):
+		
+		remove  = delete()
+		dnszone = remove.DeleteDnszone()
+		return {dnszone : 'message'}
+
+
+''' Delete wordpress user database '''
+
+class  deletedatabase(Resource):
+
+	@requires_auth
+	def post(self):
+
+		remove = delete()
+		db = remove.DeleteDb()
+		return {db : 'message'}
+
+
+class deleteuser(Resource):
+	
+	@requires_auth
+	def post(self):
+
+		remove = delete()
+		user =  remove.DeleteUser()
+		return {user : 'message'}
+
+
 api.add_resource(create, '/create')
+api.add_resource(createuser, '/createuser')
+api.add_resource(createdir, '/createdir')
+api.add_resource(createvirtualhost, '/createvirtualhost')
+api.add_resource(createdns, '/createdns')
+api.add_resource(createzone, '/createzone')
+api.add_resource(reload, '/reload')
+api.add_resource(createdatabase, '/createdatabase')
+api.add_resource(downloadwordpress, '/downloadwordpress')
+api.add_resource(installwordpress, '/installwordpress')
+api.add_resource(installwptheme, '/installwptheme')
 api.add_resource(updatepass, '/updatepass')
 api.add_resource(updatedomain, '/updatedomain')
 api.add_resource(updatewpass, '/updatewpass')
 api.add_resource(updatetheme, '/updatetheme')
 api.add_resource(remove, '/remove')
+api.add_resource(deletedir, '/deletedir')
+api.add_resource(deletevirtualhosting, '/deletevirtualhosting')
+api.add_resource(deletedns, '/deletedns')
+api.add_resource(deletedatabase, '/deletedatabase')
+api.add_resource(deleteuser, '/deleteuser')
+
 
 
 ''' curl http://username:password@example.com -d "name=bob"-d "name=sue"-d "name=joe" '''

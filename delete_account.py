@@ -15,6 +15,8 @@ import vhost_manager
 
 import os
 
+import digitalocean
+
 import crypt
 
 import io
@@ -32,6 +34,9 @@ MYSQL_HOST = 'localhost'
 MYSQL_USER = 'root'
 
 MYSQL_PASS = 'eldo2014'
+
+TOKEN = 'trytofindthistoken'
+
 
 class AccountDelete:
 
@@ -70,6 +75,11 @@ class AccountDelete:
 			vhost.remove(domain=account.domain, port = "80")
 
 	
+	#Delete the domain with Digital Ocean Api library digitalocean-python
+	def DeleteDomainOcean(account):
+
+		domain = digitalocean.Domain(name=account.domain, token=TOKEN).destroy()
+
 	#Delete Zone in named.conf.local
 	def DeleteDnsZone(account):		
 		

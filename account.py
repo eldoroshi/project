@@ -20,6 +20,8 @@ import io
 
 import MySQLdb
 
+import digitalocean
+
 from  datetime import datetime
 
 import dns.zone
@@ -31,6 +33,10 @@ from dns.rdataclass import *
 from dns.rdatatype import *
 
 from urlparse import urlparse
+
+IP_ADDRESS = "1.1.1.1"
+
+TOKEN = "trytofindthistoken"
 
 class AccountCreation:    
 
@@ -126,7 +132,14 @@ class AccountCreation:
 
 		return  "Virtual host file can't be written"
 
-   #Add Dns Zones
+       #Create domain in Digital Ocean 
+
+	def createdomain(account):
+		
+		domain = digitalocean.Domain(name=account.domain, ip_address=IP_ADDRESS, token= TOKEN).create()
+
+
+	#Add Dns Zones
 	
 	def dnszone (account):
    	

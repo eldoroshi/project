@@ -20,4 +20,6 @@ MySQLdb
 
 flask_restful
 
+python-digitalocean
+
 

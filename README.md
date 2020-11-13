@@ -1,16 +1,14 @@
 # project
 Hosting Automation System
 
-Hosting Automation System
-
 This script create all the procedures to create a normal hosting account automatically, the user have only to give 5 variables.
 
-The project isn't complete.
+The project isn't finished!
 
-I'm working to make it more secure and costumizable.
+I'm working to make it more secure and customizable.
 
 
-*Reuqired Library
+*Required Library
 
 DNS python
 
